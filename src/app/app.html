@@ -1,4 +1,81 @@
-<header><b>TRAIL/ANGULAR</b><span aria-live="polite">Cart {{ cart() }}</span></header>
-<main><section class="hero"><small>STANDALONE + SIGNALS</small><h1>Built for<br>the long way.</h1></section>
-@if (error()) { <p role="alert">{{ error() }}</p> }
-<div class="grid" aria-label="Products">@for (product of products(); track product.id) {<article><div class="art">●</div><h2>{{ product.name }}</h2><p>{{ product.description }}</p><strong>{{ product.price.amount }} {{ product.price.currency }}</strong><button [disabled]="!product.available" (click)="add()">Add {{ product.name }} to cart</button></article>}</div></main>
+<header>
+  <b>TRAIL/ANGULAR</b><span aria-live="polite">Cart {{ cart().items.length }}</span>
+</header>
+<main>
+  <section class="hero">
+    <small>STANDALONE + SIGNALS</small>
+    <h1>Built for<br />the long way.</h1>
+    <p>Preparation only—this starter does not place orders or collect payment.</p>
+  </section>
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
+  <p aria-live="polite">{{ status() }}</p>
+  <div class="grid" aria-label="Products">
+    @for (product of products(); track product.id) {
+      <article>
+        <div class="art">●</div>
+        <h2>{{ product.name }}</h2>
+        <p>{{ product.description }}</p>
+        <strong>{{ product.price.amount }} {{ product.price.currency }}</strong
+        ><button
+          [attr.data-product-id]="product.id"
+          [disabled]="!product.available || busy()"
+          (click)="add(product)"
+        >
+          Add {{ product.name }} to cart
+        </button>
+      </article>
+    }
+  </div>
+  @if (cart().items.length > 0) {
+    <section class="checkout" aria-label="Checkout preparation">
+      <h2>Prepare checkout</h2>
+      <form (submit)="prepare($event)">
+        <label>First name<input name="firstName" required /></label
+        ><label>Last name<input name="lastName" required /></label
+        ><label>Email<input name="email" type="email" required /></label
+        ><label>Address<input name="address1" required /></label
+        ><label>City<input name="city" required /></label
+        ><label>State / province<input name="state" required /></label
+        ><label>Postal code<input name="postalCode" required /></label
+        ><label>Country code<input name="country" value="CA" required /></label
+        ><button [disabled]="busy()">Load checkout choices</button>
+      </form>
+      @if (checkout(); as state) {
+        <div class="options">
+          <h3>{{ state.ready ? 'Ready for handoff' : 'Still needed' }}</h3>
+          <p>{{ state.missing.length ? state.missing.join(', ') : 'No preparation gaps' }}</p>
+          <label
+            >Shipping<select
+              aria-label="Shipping method"
+              (change)="select('shipping-method', $event)"
+            >
+              <option value="">Choose shipping</option>
+              @for (option of state.shippingOptions; track option.id) {
+                <option
+                  [value]="option.id"
+                  [selected]="option.id === state.selectedShippingMethodId"
+                >
+                  {{ option.name }}
+                </option>
+              }
+            </select></label
+          ><label
+            >Payment<select aria-label="Payment method" (change)="select('payment-method', $event)">
+              <option value="">Choose payment</option>
+              @for (option of state.paymentMethods; track option.id) {
+                <option
+                  [value]="option.id"
+                  [selected]="option.id === state.selectedPaymentMethodId"
+                >
+                  {{ option.name }}
+                </option>
+              }
+            </select></label
+          >
+        </div>
+      }
+    </section>
+  }
+</main>
