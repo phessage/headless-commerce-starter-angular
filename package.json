@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:e2e": "playwright test",
+    "test:e2e:live": "playwright test --config playwright.live.config.ts",
     "check": "npm run build && npm test -- --watch=false && npm run test:e2e"
   },
   "private": true,
