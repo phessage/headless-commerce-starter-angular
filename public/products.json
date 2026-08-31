@@ -1,0 +1,1 @@
+{"data":[{"id":"a1","name":"Field Jacket","description":"A durable layer for uncertain forecasts.","price":{"amount":"159.00","currency":"USD"},"available":true},{"id":"a2","name":"Climbing Rope","description":"Dry-treated 60 metre rope.","price":{"amount":"189.00","currency":"USD"},"available":false}],"nextCursor":null,"requestId":"synthetic_angular"}

@@ -1,0 +1,4 @@
+<header><b>TRAIL/ANGULAR</b><span aria-live="polite">Cart {{ cart() }}</span></header>
+<main><section class="hero"><small>STANDALONE + SIGNALS</small><h1>Built for<br>the long way.</h1></section>
+@if (error()) { <p role="alert">{{ error() }}</p> }
+<div class="grid" aria-label="Products">@for (product of products(); track product.id) {<article><div class="art">●</div><h2>{{ product.name }}</h2><p>{{ product.description }}</p><strong>{{ product.price.amount }} {{ product.price.currency }}</strong><button [disabled]="!product.available" (click)="add()">Add {{ product.name }} to cart</button></article>}</div></main>
