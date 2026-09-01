@@ -17,6 +17,7 @@ type Checkout = {
   missing: string[];
 };
 type RuntimeConfig = { apiUrl: string; publishableKey: string };
+type StoreConfig = { storeId: string; bootstrapUrl?: string };
 @Component({
   selector: 'app-root',
   styleUrls: ['./app.css', './checkout.css'],
@@ -30,16 +31,20 @@ export class App implements OnInit {
   readonly status = signal('');
   readonly busy = signal(false);
   private config: RuntimeConfig = { apiUrl: '', publishableKey: '' };
-  private token = '';
+  private token = sessionStorage.getItem('headless-cart-token') ?? '';
   async ngOnInit() {
     try {
-      this.config = await fetch('/headless-config.json').then((r) =>
-        r.ok ? r.json() : this.config,
-      );
-      const response = await fetch(
-        this.config.apiUrl ? `${this.base()}/v1/headless/products` : '/products.json',
-        { headers: this.headers() },
-      );
+      const store = await fetch('/headless-config.json', { cache: 'no-store' }).then((r) => {
+        if (!r.ok) throw new Error('Store configuration unavailable');
+        return r.json() as Promise<StoreConfig>;
+      });
+      const bootstrap = (store.bootstrapUrl ?? 'https://api.1ecomm.com').replace(/\/$/, '');
+      const configured = await fetch(`${bootstrap}/v1/headless/stores/${encodeURIComponent(store.storeId)}/config`);
+      if (!configured.ok) throw new Error('Store is not configured for headless commerce');
+      const runtime = (await configured.json()).data as RuntimeConfig & { storeId: string };
+      if (runtime.storeId !== store.storeId || !runtime.publishableKey.startsWith('pk_')) throw new Error('Invalid store bootstrap response');
+      this.config = runtime;
+      const response = await fetch(`${this.base()}/v1/headless/products`, { headers: this.headers() });
       if (!response.ok) throw new Error('Catalog unavailable');
       this.products.set((await response.json()).data);
     } catch (error) {
@@ -47,11 +52,7 @@ export class App implements OnInit {
     }
   }
   async add(product: Product) {
-    if (!this.config.apiUrl) {
-      this.cart.update((cart) => ({ items: [...cart.items, { id: product.id, quantity: 1 }] }));
-      this.status.set('Synthetic demo only; configure a live sandbox for checkout');
-      return;
-    }
+    if (!this.config.apiUrl) return this.error.set('Store configuration is not ready');
     this.busy.set(true);
     this.error.set('');
     try {
