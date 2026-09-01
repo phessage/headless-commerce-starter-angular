@@ -1,14 +1,10 @@
 import { expect, test } from '@playwright/test';
 test('prepares a real fixture cart from Angular', async ({ page }) => {
-  await page.route('**/headless-config.json', (route) =>
-    route.fulfill({
-      json: {
-        apiUrl: process.env.HEADLESS_API_URL,
-        publishableKey: process.env.HEADLESS_PUBLISHABLE_KEY,
-      },
-    }),
+  const bootstrapped = page.waitForResponse(
+    (r) => r.url().includes('/v1/headless/stores/') && r.status() === 200,
   );
   await page.goto('/');
+  await bootstrapped;
   const add = page.locator('button[data-product-id="1f7884bd-759d-4f47-9fdb-c7ea3dd3a9ef"]');
   await expect(add).toBeVisible();
   const added = page.waitForResponse(
