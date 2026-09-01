@@ -7,7 +7,8 @@ type Product = {
   available: boolean;
 };
 type Cart = { items: Array<{ id: string; quantity: number }> };
-type Option = { id: string; name: string };
+type Option = { id: string; name: string; capabilities?: { requiresHostedCheckout?: boolean; canPlaceOrder?: boolean } };
+type Order = { orderNumber: string; status: string; paymentStatus: string; requiresPayment: false };
 type Checkout = {
   shippingOptions: Option[];
   paymentMethods: Option[];
@@ -27,11 +28,13 @@ export class App implements OnInit {
   readonly products = signal<Product[]>([]);
   readonly cart = signal<Cart>({ items: [] });
   readonly checkout = signal<Checkout | null>(null);
+  readonly order = signal<Order | null>(null);
   readonly error = signal('');
   readonly status = signal('');
   readonly busy = signal(false);
   private config: RuntimeConfig = { apiUrl: '', publishableKey: '' };
   private token = sessionStorage.getItem('headless-cart-token') ?? '';
+  private orderIntent = '';
   async ngOnInit() {
     try {
       const store = await fetch('/headless-config.json', { cache: 'no-store' }).then((r) => {
@@ -124,6 +127,17 @@ export class App implements OnInit {
     }
     this.checkout.set((await response.json()).data);
     this.status.set(`${kind} selected`);
+  }
+  async placeOrder() {
+    const checkout = this.checkout();
+    const selected = checkout?.paymentMethods.find((method) => method.id === checkout.selectedPaymentMethodId);
+    if (!checkout?.ready || selected?.capabilities?.requiresHostedCheckout !== false || selected.capabilities.canPlaceOrder !== true) return this.error.set('Choose a supported non-hosted payment method');
+    this.busy.set(true); this.error.set(''); this.orderIntent ||= crypto.randomUUID();
+    try {
+      const response = await fetch(`${this.base()}/v1/headless/carts/current/checkout/order`, { method: 'POST', headers: { ...this.headers(), 'Idempotency-Key': this.orderIntent } });
+      if (!response.ok) { const problem = await response.json().catch(() => null) as { detail?: string; title?: string } | null; throw new Error(problem?.detail ?? problem?.title ?? `Order placement failed (${response.status})`); }
+      this.order.set((await response.json()).data); this.status.set('Pending order placed');
+    } catch (error) { this.error.set((error as Error).message); } finally { this.busy.set(false); }
   }
   private async ensureCart() {
     if (this.token) return;

@@ -5,7 +5,7 @@
   <section class="hero">
     <small>STANDALONE + SIGNALS</small>
     <h1>Built for<br />the long way.</h1>
-    <p>Preparation only—this starter does not place orders or collect payment.</p>
+    <p>Place a pending order with a server-approved non-hosted method. Payment is never collected here.</p>
   </section>
   @if (error()) {
     <p role="alert">{{ error() }}</p>
@@ -74,6 +74,8 @@
               }
             </select></label
           >
+          @if (!order()) { <button [disabled]="!state.ready || busy()" (click)="placeOrder()">Place pending order</button> }
+          @if (order(); as placed) { <section aria-label="Order confirmation"><h3>Order {{ placed.orderNumber }} placed</h3><p>Status: {{ placed.status }}</p><p>Payment: {{ placed.paymentStatus }}</p></section> }
         </div>
       }
     </section>
