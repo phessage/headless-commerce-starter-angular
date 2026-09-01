@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-test('prepares a real fixture cart from Angular', async ({ page }) => {
+test('places and renders a real non-hosted order from Angular', async ({ page }) => {
   const bootstrapped = page.waitForResponse(
     (r) => r.url().includes('/v1/headless/stores/') && r.status() === 200,
   );
@@ -43,9 +43,12 @@ test('prepares a real fixture cart from Angular', async ({ page }) => {
   await payment.selectOption({ index: 1 });
   await paymentSelected;
   await expect(page.getByText('No preparation gaps')).toBeVisible();
-  const placed = page.waitForResponse((r) => r.url().endsWith('/checkout/order') && r.request().method() === 'POST' && r.status() === 201);
+  const placed = page.waitForResponse((r) => r.url().endsWith('/checkout/order') && r.request().method() === 'POST');
   await page.getByRole('button', { name: 'Place pending order' }).click();
-  const body = await (await placed).json();
+  const response = await placed;
+  const body = await response.json();
+  expect(response.status(), JSON.stringify(body)).toBe(201);
   expect(body.data.requiresPayment).toBe(false); expect(body.data.paymentStatus).toBe('pending');
+  console.log(`Angular live order: ${body.data.orderNumber}`);
   await expect(page.getByRole('heading', { name: new RegExp(`Order ${body.data.orderNumber} placed`) })).toBeVisible();
 });
