@@ -1,5 +1,7 @@
 # 1Ecomm Angular Storefront Starter
 
+Change only `storeId` in `public/headless-config.json` to run the catalog, anonymous-cart and checkout-preparation app for another configured store. The same compiled artifact resolves its public runtime configuration at startup.
+
 Angular standalone-components and signals reference storefront for the 1Ecomm headless catalog, anonymous cart and checkout-preparation preview.
 
 Run `npm install && npm run check`. The default HTTP fixture is synthetic and contains no production data. See [architecture](docs/architecture.md).
