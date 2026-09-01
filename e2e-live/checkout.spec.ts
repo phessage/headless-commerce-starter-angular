@@ -15,7 +15,7 @@ test('places and renders a real non-hosted order from Angular', async ({ page })
   await expect(page.getByText('Cart 1')).toBeVisible();
   await page.getByLabel('First name').fill('Headless');
   await page.getByLabel('Last name').fill('Fixture');
-  await page.getByLabel('Email').fill('angular-live@example.test');
+  await page.getByLabel('Email', { exact: true }).fill('angular-live@example.test');
   await page.getByLabel('Address').fill('1 Test Way');
   await page.getByLabel('City').fill('Vancouver');
   await page.getByLabel('State / province').fill('BC');
@@ -51,4 +51,9 @@ test('places and renders a real non-hosted order from Angular', async ({ page })
   expect(body.data.requiresPayment).toBe(false); expect(body.data.paymentStatus).toBe('pending');
   console.log(`Angular live order: ${body.data.orderNumber}`);
   await expect(page.getByRole('heading', { name: new RegExp(`Order ${body.data.orderNumber} placed`) })).toBeVisible();
+  await page.reload();
+  await page.getByLabel('Order number').fill(body.data.orderNumber); await page.getByLabel('Order email').fill('angular-live@example.test');
+  const reopened = page.waitForResponse((r) => r.url().endsWith('/v1/headless/orders/lookup') && r.request().method() === 'POST');
+  await page.getByRole('button', { name: 'Check order status' }).click(); expect((await reopened).status()).toBe(201);
+  await expect(page.getByRole('heading', { name: `Order ${body.data.orderNumber}` })).toBeVisible();
 });

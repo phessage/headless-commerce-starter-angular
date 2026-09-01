@@ -9,6 +9,7 @@ type Product = {
 type Cart = { items: Array<{ id: string; quantity: number }> };
 type Option = { id: string; name: string; capabilities?: { requiresHostedCheckout?: boolean; canPlaceOrder?: boolean } };
 type Order = { orderNumber: string; status: string; paymentStatus: string; requiresPayment: false };
+type OrderStatus = { orderNumber: string; status: string; paymentStatus: string; tracking: Record<string, unknown> | null };
 type Checkout = {
   shippingOptions: Option[];
   paymentMethods: Option[];
@@ -29,6 +30,7 @@ export class App implements OnInit {
   readonly cart = signal<Cart>({ items: [] });
   readonly checkout = signal<Checkout | null>(null);
   readonly order = signal<Order | null>(null);
+  readonly orderStatus = signal<OrderStatus | null>(null);
   readonly error = signal('');
   readonly status = signal('');
   readonly busy = signal(false);
@@ -138,6 +140,13 @@ export class App implements OnInit {
       if (!response.ok) { const problem = await response.json().catch(() => null) as { detail?: string; title?: string } | null; throw new Error(problem?.detail ?? problem?.title ?? `Order placement failed (${response.status})`); }
       this.order.set((await response.json()).data); this.status.set('Pending order placed');
     } catch (error) { this.error.set((error as Error).message); } finally { this.busy.set(false); }
+  }
+  async lookupOrder(event: SubmitEvent) {
+    event.preventDefault(); this.error.set(''); this.orderStatus.set(null);
+    const data = new FormData(event.target as HTMLFormElement);
+    const response = await fetch(`${this.base()}/v1/headless/orders/lookup`, { method: 'POST', headers: this.headers(true), body: JSON.stringify({ orderNumber: String(data.get('orderNumber')), email: String(data.get('orderEmail')) }) });
+    if (!response.ok) return this.error.set('We could not find an order with those details');
+    this.orderStatus.set((await response.json()).data);
   }
   private async ensureCart() {
     if (this.token) return;

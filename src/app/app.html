@@ -80,4 +80,9 @@
       }
     </section>
   }
+  <section class="checkout" aria-label="Find an order">
+    <h2>Find your order</h2><p>Use the order number and email entered at checkout.</p>
+    <form (submit)="lookupOrder($event)"><label>Order number<input name="orderNumber" required /></label><label>Order email<input name="orderEmail" type="email" required /></label><button>Check order status</button></form>
+    @if (orderStatus(); as found) { <section aria-label="Order status"><h3>Order {{ found.orderNumber }}</h3><p>Status: {{ found.status }}</p><p>Payment: {{ found.paymentStatus }}</p><p>{{ found.tracking ? 'Tracking is available' : 'Tracking is not available yet' }}</p></section> }
+  </section>
 </main>
