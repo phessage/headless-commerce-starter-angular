@@ -17,6 +17,10 @@ The service owns tenant scope, price, inventory, shipping/payment choices and or
 - Preserve semantic forms, labels, focus, live errors and keyboard behavior.
 - Angular 22.1 supports TypeScript `>=6.0 <6.1`; do not “upgrade” to TypeScript 7 until Angular's official compatibility table permits it.
 
+## License boundary
+
+`LICENSE.md` allows authorized 1Ecomm customer projects and deployed or compiled shopper applications, but prohibits redistribution of this reusable starter or its derivatives. Preserve the notice in clones, packages, generated projects and documentation. Do not describe this repository as open source or grant broader rights in examples.
+
 ## Verification
 
 Run `rm -rf node_modules && npm ci`, `npm run check`, then the authorized sandbox live suite. Tests must cross the real transport boundary and assert rendered commerce results. Update package-lock with dependency changes and never bypass Angular peer requirements or disable version checks.

@@ -1,5 +1,7 @@
 # 1Ecomm Angular Storefront Starter
 
+Free for authorized 1Ecomm customers and their developers to build and operate 1Ecomm-connected storefronts. You may deploy the finished store, but may not redistribute, resell, sublicense, mirror, or republish this starter or a reusable derivative. See [LICENSE.md](LICENSE.md).
+
 This is a ready-to-run Angular shop using standalone components and signals. It shows products, cart, guest checkout choices and a pending non-hosted order confirmation. It never charges a card or wallet.
 
 ## Run it
