@@ -4,7 +4,7 @@ Read this file, `README.md`, `docs/architecture.md`, `src/app/*`, Angular config
 
 ## Boundary and contract
 
-This is an Angular 22 standalone/signals reference. One `storeId` in `public/headless-config.json` bootstraps public runtime values. It fails closed and must not embed secrets or synthetic fallback commerce. Canonical HTTP truth is `phessage/ecommerce-service/contracts/headless-commerce-v1.openapi.yaml`.
+This is an Angular 22 standalone/signals reference. One `storeId` in `public/headless-config.json` bootstraps public runtime values. It fails closed and must not embed secrets or synthetic fallback commerce. Canonical HTTP truth is `https://www.1ecomm.com/headless-commerce/openapi.yaml`.
 
 The service owns tenant scope, price, inventory, shipping/payment choices and orders. `x-cart-token` is a bearer capability; never log or place it in a URL. Do not retry mutations or lookup; only retry order placement with the same intent key. Order line count is `items.length`, not `itemCount`.
 
